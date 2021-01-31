@@ -1,6 +1,7 @@
 import os
 import json
 
+from constants import SITENAMES
 from keep_alive import keep_alive
 from replit import db
 from discord.ext import commands
@@ -44,6 +45,29 @@ async def requests(ctx):
     
     await ctx.channel.send(message)
 
+@bot.command()
+async def username(ctx, *args):
+    prefix = "username_" + str(ctx.author.id) + "_"
+    if  len(args) == 2:
+      if args[0].lower() in SITENAMES:
+        db[prefix + args[0].lower()] = args[1]
+        await ctx.send(ctx.author.mention + " Your username on " + args[0].lower() + " is now saved as " + args[1] + ".")
+        return 0
+
+    if args[0] == "status":
+      
+      savedNamesKeys = db.prefix(prefix)
+      if len(savedNamesKeys) == 0:
+        await ctx.send(ctx.author.mention + " You haven't saved a username yet.")
+      else:
+        message = ctx.author.mention + " Here are your saved usernames for the different websites:"
+        for sitename in SITENAMES:
+          if prefix + sitename in savedNamesKeys:
+            message += "\r\n" + sitename.capitalize() + " : " + db[prefix + sitename]
+        await ctx.send(message)
+      return 0
+    await ctx.send(ctx.author.mention + " To use this command blablabla...") #TODO : add an actual help message 
+    return 1
 
 keep_alive()
 bot.run(os.getenv("TOKEN"))
